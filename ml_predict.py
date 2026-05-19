@@ -57,5 +57,19 @@ plt.legend()
 plt.grid(True)
 plt.show()
 
+
+# ---- අලුතින් එකතු කරන කෑල්ල: Prediction එක Database එකට යැවීම ----
+total_predicted_next_month = float(np.sum(predicted_amounts) * 4) # සති 4ක එකතුව
+
+cursor = conn.cursor()
+# UserID 2 ගේ CategoryID 1 (Food) එකේ බජට් එක විදිහට මේ ML Forecast එක සේව් කරනවා
+cursor.execute("""
+    UPDATE UserBudget 
+    SET MonthlyLimit = ? 
+    WHERE UserID = 2 AND CategoryID = 1
+""", (total_predicted_next_month,))
+conn.commit()
+print(f"Successfully saved ML Forecast (${total_predicted_next_month:.2f}) to Database!")
+# -------------------------------------------------------------
 # Connection එක close කිරීම
 conn.close()
