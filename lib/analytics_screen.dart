@@ -1,7 +1,46 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http; // අලුතින් එකතු කළා
+import 'dart:convert'; // අලුතින් එකතු කළා
 
-class AnalyticsScreen extends StatelessWidget {
+class AnalyticsScreen extends StatefulWidget {
   const AnalyticsScreen({Key? key}) : super(key: key);
+
+  @override
+  State<AnalyticsScreen> createState() => _AnalyticsScreenState();
+}
+
+class _AnalyticsScreenState extends State<AnalyticsScreen> {
+  // Python ML එකෙන් එන ඇත්තම අගය දාන්න Variables හදාගන්නවා
+  double _mlForecastAmount =
+      4850.00; // API එක වැඩ නොකරුවොත් පරණ ගානම Default තියෙනවා
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchMLForecast(); // Screen එක open වෙද්දීම API එකට කෝල් කරනවා
+  }
+
+  // Node.js හරහා Database එකේ තියෙන ML Forecast එක ගන්නා ශ්‍රිතය
+  Future<void> _fetchMLForecast() async {
+    try {
+      final response = await http.get(
+        Uri.parse('http://localhost:3000/api/forecast/2'),
+      );
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          _mlForecastAmount = data['forecast'];
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      print("Error fetching forecast: $e");
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +93,7 @@ class AnalyticsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
 
-            // 1. Next Month Forecast Card
+            // 1. Next Month Forecast Card (දැන් මේක ඇත්තම දත්ත එක්ක වැඩ කරනවා)
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
@@ -84,11 +123,14 @@ class AnalyticsScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        '\$4,850.00',
-                        style: TextStyle(
+                      // දත්ත लोड වෙනකන් 'Loading...' පෙන්වනවා, ආවට පස්සේ ඇත්තම ගාන පෙන්වනවා
+                      Text(
+                        _isLoading
+                            ? "Loading..."
+                            : "\$${_mlForecastAmount.toStringAsFixed(2)}",
+                        style: const TextStyle(
                           color: Color(0xFFFFD700),
-                          fontSize: 28,
+                          fontSize: 24,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -310,21 +352,16 @@ class AnalyticsScreen extends StatelessWidget {
       ),
 
       // Bottom Navigation Bar
-      // Bottom Navigation Bar
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: const Color(0xFF1E1E1E),
         selectedItemColor: const Color(0xFFFFD700),
         unselectedItemColor: Colors.white54,
-
-        currentIndex: 1, // AnalyticsScreen (Reports) එකේ ඉන්න නිසා 1
-
+        currentIndex: 1, // Reports Selected
         onTap: (index) {
           if (index == 0) {
-            // Dashboard එබුවම පරණ තිරයටම යනවා
             Navigator.pop(context);
           }
         },
-
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.dashboard),
@@ -394,7 +431,6 @@ class AnalyticsScreen extends StatelessWidget {
   }
 }
 
-// Mini graph line custom painter
 class _MiniChartPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
