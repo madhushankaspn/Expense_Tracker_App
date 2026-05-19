@@ -11,11 +11,68 @@ class AddExpenseScreen extends StatefulWidget {
 
 class _AddExpenseScreenState extends State<AddExpenseScreen> {
   String _amount = "0.00";
-
-  // මෙන්න අපි හදාගත්ත අලුත් Variable එක (මුලින්ම Food තෝරලා තියෙන්න 1 දෙනවා)
   int _selectedCategoryId = 1;
 
+  // 1. අද දවස මුලින්ම Variable එකකට ගන්නවා
+  DateTime _selectedDate = DateTime.now();
+
   final TextEditingController _noteController = TextEditingController();
+
+  // දිනය ලස්සනට UI එකේ පෙන්වන්න හදාගත්ත function එකක්
+  String _getFormattedDate(DateTime date) {
+    final now = DateTime.now();
+    final months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+
+    if (date.year == now.year &&
+        date.month == now.month &&
+        date.day == now.day) {
+      return "Today, ${months[date.month - 1]} ${date.day}";
+    }
+    return "${months[date.month - 1]} ${date.day}, ${date.year}";
+  }
+
+  // 2. Calendar එක open කරන function එක
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2030),
+      builder: (context, child) {
+        // App එකේ theme එකට ගැලපෙන්න Calendar එකත් Dark/Gold කරනවා
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.dark(
+              primary: Color(0xFFFFD700), // Gold color buttons/header
+              onPrimary: Colors.black,
+              surface: Color(0xFF1E1E1E), // Dark background for calendar
+              onSurface: Colors.white,
+            ),
+            dialogBackgroundColor: const Color(0xFF121212),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked; // තෝරපු දවස variable එකට දානවා
+      });
+    }
+  }
 
   // Number pad එකේ බොත්තම් ඔබද්දී amount එක හැදෙන විදිය
   void _onNumPadTap(String value) {
@@ -39,7 +96,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF121212), // Dark background
+      backgroundColor: const Color(0xFF121212),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -132,7 +189,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                   ),
                   const SizedBox(height: 20),
 
-                  // Category Icons (ID එකත් එක්ක දෙනවා)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -144,49 +200,56 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                   ),
                   const SizedBox(height: 30),
 
-                  // Date Picker
-                  Container(
-                    padding: const EdgeInsets.all(15),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF1E1E1E),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: Colors.white10),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.calendar_today,
-                          color: Color(0xFFFFD700),
-                          size: 20,
-                        ),
-                        const SizedBox(width: 15),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
-                            Text(
-                              'DATE',
-                              style: TextStyle(
-                                color: Colors.white54,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
+                  // 3. Date Picker (දැන් InkWell එකකින් click කරන්න පුළුවන් කරලා තියෙන්නේ)
+                  InkWell(
+                    onTap: () =>
+                        _selectDate(context), // Click කරාම calendar එක එනවා
+                    borderRadius: BorderRadius.circular(10),
+                    child: Container(
+                      padding: const EdgeInsets.all(15),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1E1E1E),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.white10),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.calendar_today,
+                            color: Color(0xFFFFD700),
+                            size: 20,
+                          ),
+                          const SizedBox(width: 15),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'DATE',
+                                style: TextStyle(
+                                  color: Colors.white54,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
-                            Text(
-                              'Today, Oct 24',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
+                              Text(
+                                _getFormattedDate(
+                                  _selectedDate,
+                                ), // Dynamic දිනය මෙතනට වැටෙනවා
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                        const Spacer(),
-                        const Icon(
-                          Icons.arrow_forward_ios,
-                          color: Colors.white54,
-                          size: 14,
-                        ),
-                      ],
+                            ],
+                          ),
+                          const Spacer(),
+                          const Icon(
+                            Icons.arrow_forward_ios,
+                            color: Colors.white54,
+                            size: 14,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   const SizedBox(height: 15),
@@ -249,7 +312,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                 ),
                 const SizedBox(height: 15),
 
-                // Save Button
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
@@ -258,16 +320,20 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                         'http://localhost:3000/api/expenses',
                       );
 
+                      // Database එකට YYYY-MM-DD විදියට යවන්න හදාගන්නවා
+                      String apiFormattedDate =
+                          "${_selectedDate.year}-${_selectedDate.month.toString().padLeft(2, '0')}-${_selectedDate.day.toString().padLeft(2, '0')}";
+
                       try {
                         final response = await http.post(
                           url,
                           headers: {'Content-Type': 'application/json'},
                           body: json.encode({
                             'userId': 2,
-                            'categoryId':
-                                _selectedCategoryId, // <-- හරි Category ID එක මෙතනින් යනවා
+                            'categoryId': _selectedCategoryId,
                             'amount': double.parse(_amount),
-                            'expenseDate': '2026-05-19',
+                            'expenseDate':
+                                apiFormattedDate, // <-- 4. පරණ hardcode දවස වෙනුවට ඇත්තම දවස මෙතනින් යනවා
                             'description': _noteController.text.isEmpty
                                 ? 'Flutter App Expense'
                                 : _noteController.text,
@@ -282,7 +348,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                               ),
                             ),
                           );
-                          // Save උනාට පස්සේ Dashboard එකට ගානත් අරන් යනවා
                           Navigator.pop(context, double.parse(_amount));
                         } else {
                           print('Failed: ${response.body}');
@@ -321,7 +386,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     );
   }
 
-  // Category Icon එක හදන widget එක (ID එකෙන් වැඩ කරන විදියට හැදුවා)
   Widget _buildCategoryIcon(IconData icon, String label, int id) {
     bool isSelected = _selectedCategoryId == id;
 
@@ -352,7 +416,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     );
   }
 
-  // Number Pad එකේ පේළි හදන widget එක
   Widget _buildNumPadRow(List<String> keys) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
