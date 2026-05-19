@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'add_expense_screen.dart';
+import 'dashboard_screen.dart'; // Dashboard එක import කරගන්නවා
 
 void main() {
   runApp(const ExpenseTrackerApp());
@@ -12,9 +12,11 @@ class ExpenseTrackerApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Expense Tracker',
+      debugShowCheckedModeBanner:
+          false, 
       theme: ThemeData(primarySwatch: Colors.blue),
-      // අපි ඊළඟට හදන Add Expense screen එක තමයි මුලින්ම පේන්න දාන්නේ
-      home: const AddExpenseScreen(),
+      
+      home: const DashboardScreen(),
     );
   }
 }

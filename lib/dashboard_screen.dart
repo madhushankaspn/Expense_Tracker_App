@@ -1,8 +1,19 @@
 import 'package:flutter/material.dart';
 import 'add_expense_screen.dart'; // අපි කලින් හදපු file එක import කරගන්නවා
 
-class DashboardScreen extends StatelessWidget {
+// StatefulWidget එකක් විදියට වෙනස් කළා
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({Key? key}) : super(key: key);
+
+  @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  // අපි වෙනස් වෙන ගණන් ටික Variables විදියට හදාගන්නවා
+  double totalBalance = 12450.00;
+  double monthlySpend = 3200.50;
+  double monthlyBudget = 5000.00; // Progress bar එකට ඕන නිසා Budget එකක් දැම්මා
 
   @override
   Widget build(BuildContext context) {
@@ -43,21 +54,24 @@ class DashboardScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Total Balance Card
+            // Total Balance Card (දැන් variable එකෙන් ගාන ගන්නේ)
             _buildBalanceCard(
               title: 'Total Balance',
-              amount: '\$12,450.00',
+              amount: '\$${totalBalance.toStringAsFixed(2)}',
               trend: '+2.4% from last month',
               icon: Icons.account_balance_wallet_outlined,
             ),
             const SizedBox(height: 16),
 
-            // Monthly Spend Card
+            // Monthly Spend Card (මේකත් dynamic කළා)
             _buildSpendCard(
               title: 'Monthly Spend',
-              amount: '\$3,200.50',
-              subtitle: '85% of monthly budget',
-              progress: 0.85,
+              amount: '\$${monthlySpend.toStringAsFixed(2)}',
+              subtitle:
+                  '${((monthlySpend / monthlyBudget) * 100).toStringAsFixed(0)}% of monthly budget',
+              progress: monthlySpend / monthlyBudget > 1.0
+                  ? 1.0
+                  : monthlySpend / monthlyBudget,
             ),
             const SizedBox(height: 24),
 
@@ -114,14 +128,22 @@ class DashboardScreen extends StatelessWidget {
         ),
       ),
 
-      // Floating Add Expense Button (Like in the design)
+      // Floating Add Expense Button
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          // කලින් හදපු Add Expense Screen එකට යනවා
-          Navigator.push(
+        onPressed: () async {
+          // Navigator එකෙන් Screen එකට ගිහින් එන ගාන අල්ලගන්නවා (await)
+          final addedAmount = await Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const AddExpenseScreen()),
           );
+
+          // ගානක් ආවොත් විතරක් (null නෙවෙයි නම්) Variables අලුත් කරනවා
+          if (addedAmount != null && addedAmount is double) {
+            setState(() {
+              totalBalance -= addedAmount; // Balance එකෙන් අඩු කරනවා
+              monthlySpend += addedAmount; // Spend එකට එකතු කරනවා
+            });
+          }
         },
         backgroundColor: const Color(0xFF2EBC84), // Emerald Green
         icon: const Icon(Icons.add, color: Colors.black),
