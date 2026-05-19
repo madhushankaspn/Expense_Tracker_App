@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'add_expense_screen.dart'; // අපි කලින් හදපු file එක import කරගන්නවා
+import 'analytics_screen.dart';
 
 // StatefulWidget එකක් විදියට වෙනස් කළා
 class DashboardScreen extends StatefulWidget {
@@ -153,12 +154,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-
+      // Bottom Navigation Bar
       // Bottom Navigation Bar
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: const Color(0xFF1E1E1E),
         selectedItemColor: const Color(0xFFFFD700),
         unselectedItemColor: Colors.white54,
+
+        currentIndex: 0, // Dashboard එකේ ඉන්න නිසා 0
+
+        onTap: (index) {
+          if (index == 1) {
+            // Reports එබුවම AnalyticsScreen එකට යනවා
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const AnalyticsScreen()),
+            );
+          }
+        },
+
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.dashboard),
@@ -176,7 +190,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
     );
   }
-
   // --- Helper Widgets ---
 
   Widget _buildBalanceCard({

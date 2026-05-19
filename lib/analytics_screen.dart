@@ -310,11 +310,21 @@ class AnalyticsScreen extends StatelessWidget {
       ),
 
       // Bottom Navigation Bar
+      // Bottom Navigation Bar
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: const Color(0xFF1E1E1E),
         selectedItemColor: const Color(0xFFFFD700),
         unselectedItemColor: Colors.white54,
-        currentIndex: 1, // Reports is selected
+
+        currentIndex: 1, // AnalyticsScreen (Reports) එකේ ඉන්න නිසා 1
+
+        onTap: (index) {
+          if (index == 0) {
+            // Dashboard එබුවම පරණ තිරයටම යනවා
+            Navigator.pop(context);
+          }
+        },
+
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.dashboard),
